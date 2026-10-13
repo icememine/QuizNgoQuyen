@@ -1,0 +1,265 @@
+<title>Quiz Ngô Quyền</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&family=Playfair+Display:wght@700;900&family=Lora:ital,wght@0,500;0,700;1,500&family=Bangers&display=swap">
+<style>
+/* Layout: a style picker pinned on top, one phone-sized quiz column below.
+   Three committed looks, switched by data-style on :root; each sets every color itself. */
+:root{
+  --f-app-display:"Baloo 2","Nunito",ui-rounded,system-ui,sans-serif;
+  --f-app-body:"Nunito",ui-rounded,system-ui,sans-serif;
+  --f-old-display:"Playfair Display",Georgia,"Times New Roman",serif;
+  --f-old-body:"Lora",Georgia,serif;
+  --f-toon-display:"Bangers","Baloo 2",Impact,sans-serif;
+  --f-toon-body:"Nunito",system-ui,sans-serif;
+
+  /* Style 1 · Ứng dụng (dark navy app, like the math app screenshots) */
+  --page:#0F1823; --surface:#141F2B; --sunken:#1C2A38; --ink:#E6EEF5; --muted:#8FA3B4; --line:#2A3B4B;
+  --accent:#4C9EE3; --accent-deep:#28689F; --accent-soft:#13283A;
+  --good:#27BF86; --good-deep:#137E58; --good-soft:#123A2C;
+  --bad:#F0626A; --bad-deep:#A8323B; --bad-soft:#3D1A1D;
+  --gold:#F4B840; --gold-deep:#A87310;
+  --f-display:var(--f-app-display); --f-body:var(--f-app-body);
+  --radius:16px; color-scheme:dark;
+}
+/* Style 2 · Tranh cổ (parchment, wood, sea foam, red seal — the Bạch Đằng diorama) */
+:root[data-style="old"]{
+  --page:#CFDCE0; --surface:#F3E6C8; --sunken:#EAD9B3; --ink:#2E1F12; --muted:#7A6248; --line:#B9966A;
+  --accent:#6B3F22; --accent-deep:#3F2312; --accent-soft:#E6D2A6;
+  --good:#2F7D5B; --good-deep:#1E5A40; --good-soft:#D9EBD9;
+  --bad:#B3302A; --bad-deep:#7F1F1B; --bad-soft:#F2D3C8;
+  --gold:#C9972B; --gold-deep:#8A6316;
+  --f-display:var(--f-old-display); --f-body:var(--f-old-body);
+  --radius:6px; color-scheme:light;
+}
+/* Style 3 · Phim hoạt hình (candle-lit war room, amber on deep brown) */
+:root[data-style="toon"]{
+  --page:#140E07; --surface:#2A1C0E; --sunken:#3A2814; --ink:#FFF1D6; --muted:#C9A97A; --line:#5A3F1E;
+  --accent:#F5B942; --accent-deep:#9A6A12; --accent-soft:#4A3312;
+  --good:#8FD36A; --good-deep:#3E7A24; --good-soft:#2B3D18;
+  --bad:#FF7A5C; --bad-deep:#A33A22; --bad-soft:#4A2217;
+  --gold:#F5B942; --gold-deep:#9A6A12;
+  --f-display:var(--f-toon-display); --f-body:var(--f-toon-body);
+  --radius:12px; color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.15}
+p{margin:0}
+
+/* ---------- style picker ---------- */
+.picker{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-bottom:2px solid var(--line)}
+.picker .lab{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.pick{border:2px solid var(--line);background:var(--sunken);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px}
+.pick b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--line);font-size:11px}
+.pick[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.pick[aria-pressed="true"] b{background:var(--accent);color:var(--page)}
+
+/* ---------- quiz shell ---------- */
+.wrap{flex:1;display:flex;justify-content:center;padding:16px 16px 24px}
+.shell{position:relative;width:100%;max-width:520px;min-height:640px;background:var(--surface);display:flex;flex-direction:column;overflow:hidden;border-radius:28px;border:2px solid var(--line)}
+.top{display:flex;align-items:center;gap:12px;padding:16px 16px 8px}
+.close{background:none;border:0;color:var(--muted);font-size:22px;line-height:1;padding:4px}
+.bar{flex:1;height:16px;border-radius:999px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--good);border-radius:999px;transition:width .35s ease;position:relative}
+.bar i::after{content:"";position:absolute;left:8px;right:8px;top:4px;height:4px;border-radius:4px;background:rgba(255,255,255,.35)}
+.score{display:flex;align-items:center;gap:5px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.score svg{width:20px;height:20px}
+.stakes{display:none;gap:6px;align-items:flex-end}
+.stakes i{width:10px;height:26px;background:var(--line);clip-path:polygon(50% 0,100% 30%,100% 100%,0 100%,0 30%);opacity:.45}
+.stakes i.on{background:var(--accent);opacity:1}
+
+.q{flex:1;padding:12px 20px 24px;display:flex;flex-direction:column;gap:16px}
+.kind{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.kind.hard{color:var(--bad)}
+.q h2{font-size:23px;font-weight:800}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;border:2px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:12px 14px;box-shadow:0 3px 0 var(--line);font-weight:700;font-size:16px;transition:transform .06s}
+.opt:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.opt .key{flex:none;width:28px;height:28px;border:2px solid var(--line);border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 3px 0 var(--accent)}
+.opt[aria-pressed="true"] .key{border-color:var(--accent);color:var(--accent)}
+.opt.right{border-color:var(--good);background:var(--good-soft);box-shadow:0 3px 0 var(--good)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);box-shadow:0 3px 0 var(--bad)}
+.opt[disabled]{cursor:default}
+.opt[disabled]:active{transform:none}
+
+.foot{border-top:2px solid var(--line);padding:14px 20px 18px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+.foot.right{background:var(--good-soft);border-top-color:transparent}
+.foot.wrong{background:var(--bad-soft);border-top-color:transparent}
+.fb-head{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:22px;font-weight:800}
+.foot.right .fb-head{color:var(--good)} .foot.wrong .fb-head{color:var(--bad)}
+.fb-head .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface);font-size:18px}
+.fb-body{font-size:15px;font-weight:600}
+.fb-body b{font-weight:800}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;border:0;border-radius:var(--radius);padding:14px 18px;font-family:var(--f-body);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;background:var(--good);color:#fff;box-shadow:0 4px 0 var(--good-deep);transition:transform .06s,box-shadow .06s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--good-deep)}
+.btn[disabled]{background:var(--sunken);color:var(--muted);box-shadow:0 4px 0 var(--line);cursor:default}
+.foot.wrong .btn{background:var(--bad);box-shadow:0 4px 0 var(--bad-deep)}
+
+.result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 20px;text-align:center}
+.result h2{font-size:30px;color:var(--gold)}
+.result p{color:var(--muted);font-weight:600;max-width:30ch}
+.big-stars{display:flex;gap:6px;color:var(--gold)}
+.big-stars svg{width:44px;height:44px}
+.big-stars .off{color:var(--line)}
+.tile{border:2px solid var(--gold);border-radius:var(--radius);overflow:hidden;font-weight:800;min-width:140px}
+.tile .lab{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--page);background:var(--gold);padding:4px}
+.tile .val{padding:12px;font-size:24px;color:var(--gold);font-variant-numeric:tabular-nums}
+.result .btn{max-width:320px}
+
+/* ===================== Style 2 · Tranh cổ ===================== */
+:root[data-style="old"] body{background:
+  radial-gradient(ellipse 60% 30% at 20% 10%,rgba(255,255,255,.55),transparent 60%),
+  radial-gradient(ellipse 50% 25% at 80% 30%,rgba(255,255,255,.4),transparent 60%),
+  repeating-linear-gradient(170deg,rgba(255,255,255,.18) 0 6px,transparent 6px 22px),
+  linear-gradient(#DCE7EA,#B8CDD3 60%,#9DB7C0)}
+:root[data-style="old"] .picker{background:#F3E6C8}
+:root[data-style="old"] .shell{border-radius:4px;border:3px double var(--accent);box-shadow:0 0 0 6px #F3E6C8,0 0 0 9px var(--accent),0 24px 40px -20px rgba(30,20,10,.5);
+  background:linear-gradient(rgba(107,63,34,.04),transparent 20%),radial-gradient(circle at 10% 90%,rgba(107,63,34,.08),transparent 40%),var(--surface)}
+:root[data-style="old"] .bar{display:none}
+:root[data-style="old"] .stakes{display:flex;flex:1;justify-content:center}
+:root[data-style="old"] .top{border-bottom:1px solid var(--line);margin:0 16px;padding:14px 0 10px}
+:root[data-style="old"] .kind{font-family:var(--f-old-display);letter-spacing:.2em;color:var(--bad);text-align:center}
+:root[data-style="old"] .kind::before,:root[data-style="old"] .kind::after{content:" ❧ ";color:var(--gold)}
+:root[data-style="old"] .q h2{font-size:24px;font-weight:900;text-align:center;font-style:normal}
+:root[data-style="old"] .opt{background:var(--sunken);border:1px solid var(--line);box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--line);font-family:var(--f-old-body);font-weight:500;font-size:17px}
+:root[data-style="old"] .opt .key{border-radius:50%;border:2px solid var(--bad);color:var(--bad);font-family:var(--f-old-display)}
+:root[data-style="old"] .opt[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--accent)}
+:root[data-style="old"] .opt.right{box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--good)}
+:root[data-style="old"] .opt.wrong{box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--bad)}
+:root[data-style="old"] .foot{border-top:1px solid var(--line);position:relative}
+:root[data-style="old"] .foot.right,:root[data-style="old"] .foot.wrong{background:var(--surface)}
+:root[data-style="old"] .fb-head{font-weight:900;font-style:italic}
+:root[data-style="old"] .fb-head .dot{display:none}
+:root[data-style="old"] .seal{position:absolute;right:18px;top:-18px;width:64px;height:64px;border:3px solid var(--bad);border-radius:50%;display:grid;place-items:center;color:var(--bad);font-family:var(--f-old-display);font-weight:900;font-size:14px;letter-spacing:.06em;transform:rotate(-12deg);opacity:.9;background:var(--surface)}
+:root[data-style="old"] .foot.right .seal{border-color:var(--good);color:var(--good)}
+:root[data-style="old"] .btn{background:var(--accent);box-shadow:0 4px 0 var(--accent-deep);font-family:var(--f-old-display);letter-spacing:.14em;color:#F8EDD2}
+:root[data-style="old"] .foot.wrong .btn{background:var(--bad);box-shadow:0 4px 0 var(--bad-deep)}
+:root[data-style="old"] .result h2{font-weight:900;color:var(--accent)}
+
+/* ===================== Style 3 · Phim hoạt hình ===================== */
+:root[data-style="toon"] body{background:radial-gradient(ellipse 70% 50% at 50% 0%,#5A3A12 0%,#2E1C09 45%,#140E07 100%)}
+:root[data-style="toon"] .picker{background:rgba(20,14,7,.85);backdrop-filter:blur(6px)}
+:root[data-style="toon"] .shell{border:3px solid #3A2814;border-radius:20px;box-shadow:0 0 0 2px #1a1208,0 0 60px rgba(245,185,66,.18),0 30px 60px -30px #000;
+  background:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(245,185,66,.22),transparent 70%),var(--surface)}
+:root[data-style="toon"] .shell::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+  repeating-linear-gradient(90deg,rgba(0,0,0,.08) 0 1px,transparent 1px 3px);opacity:.5}
+:root[data-style="toon"] .bar{background:#1a1208;border:2px solid #3A2814;height:18px}
+:root[data-style="toon"] .bar i{background:linear-gradient(#FFD36E,#F5B942 60%,#C98A1E);box-shadow:0 0 12px rgba(245,185,66,.7)}
+:root[data-style="toon"] .kind{font-family:var(--f-toon-display);letter-spacing:.12em;font-size:16px;color:var(--gold);text-shadow:2px 2px 0 #000}
+:root[data-style="toon"] .kind.hard{color:var(--bad)}
+:root[data-style="toon"] .q h2{font-family:var(--f-toon-display);font-weight:400;font-size:32px;letter-spacing:.03em;color:var(--ink);text-shadow:3px 3px 0 #000,0 0 18px rgba(245,185,66,.35);line-height:1.1}
+:root[data-style="toon"] .opt{background:linear-gradient(#3A2814,#2A1C0E);border:3px solid #1a1208;box-shadow:0 4px 0 #0c0804,inset 0 1px 0 rgba(255,255,255,.08);font-weight:800;font-size:17px}
+:root[data-style="toon"] .opt .key{background:var(--gold);color:#2A1C0E;border-color:#0c0804;border-radius:50%;font-family:var(--f-toon-display);font-size:15px;text-shadow:none}
+:root[data-style="toon"] .opt[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 4px 0 #0c0804,0 0 16px rgba(245,185,66,.55);background:var(--accent-soft)}
+:root[data-style="toon"] .opt.right{border-color:var(--good);box-shadow:0 4px 0 #0c0804,0 0 16px rgba(143,211,106,.5)}
+:root[data-style="toon"] .opt.wrong{border-color:var(--bad);box-shadow:0 4px 0 #0c0804,0 0 16px rgba(255,122,92,.5)}
+:root[data-style="toon"] .foot{border-top:3px solid #1a1208}
+:root[data-style="toon"] .fb-head{font-family:var(--f-toon-display);font-weight:400;font-size:30px;letter-spacing:.04em;text-shadow:3px 3px 0 #000}
+:root[data-style="toon"] .fb-head .dot{background:#1a1208;border:2px solid currentColor}
+:root[data-style="toon"] .btn{background:linear-gradient(#FFD36E,#F5B942 60%,#E0A030);color:#2A1C0E;box-shadow:0 5px 0 var(--gold-deep),0 0 20px rgba(245,185,66,.35);font-family:var(--f-toon-display);font-size:22px;letter-spacing:.1em;text-transform:none;font-weight:400}
+:root[data-style="toon"] .foot.wrong .btn{background:linear-gradient(#FF9B82,#FF7A5C 60%,#D85A3E);box-shadow:0 5px 0 var(--bad-deep)}
+:root[data-style="toon"] .result h2{font-family:var(--f-toon-display);font-weight:400;font-size:44px;text-shadow:3px 3px 0 #000}
+:root[data-style="toon"] .flame{display:none}
+:root[data-style="toon"] .top .flame{display:block;width:14px;height:22px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 50% 80%,#FFF4C2,#F5B942 50%,#E0541E 90%);box-shadow:0 0 14px #F5B942;animation:flick 1.1s ease-in-out infinite alternate}
+@keyframes flick{to{transform:scaleY(.88) translateX(1px);box-shadow:0 0 20px #F5B942}}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<nav class="picker" aria-label="Chọn giao diện">
+  <span class="lab">Giao diện</span>
+  <button class="pick" data-s="app" aria-pressed="true"><b>1</b>Ứng dụng</button>
+  <button class="pick" data-s="old" aria-pressed="false"><b>2</b>Tranh cổ</button>
+  <button class="pick" data-s="toon" aria-pressed="false"><b>3</b>Phim hoạt hình</button>
+</nav>
+<div class="wrap"><main class="shell" id="app"></main></div>
+
+<script>
+(function(){
+'use strict';
+const Q = [
+  { q:'Quân địch kéo sang xâm lược nước ta có bao nhiêu quân?', opts:['2.000 quân','20.000 quân','200.000 quân','2.000.000 quân'], a:1,
+    ex:'Vua Nam Hán sai con là Lưu Hoằng Tháo đem <b>20.000 quân</b> đi thuyền chiến sang đánh nước ta.' },
+  { q:'Quân địch là nhà nào của Trung Quốc?', opts:['Nhà Đường','Nhà Tống','Nam Hán','Nhà Minh'], a:2,
+    ex:'Năm 938, quân <b>Nam Hán</b> theo đường biển tiến vào sông Bạch Đằng.' },
+  { q:'Ai là người phản bội Dương Đình Nghệ?', opts:['Kiều Công Tiễn','Lưu Hoằng Tháo','Khúc Thừa Dụ','Ngô Quyền'], a:0,
+    ex:'<b>Kiều Công Tiễn</b> giết Dương Đình Nghệ rồi cầu cứu quân Nam Hán. Ngô Quyền kéo quân ra trừng trị kẻ phản bội.' },
+  { q:'Tại sao Ngô Quyền chiến thắng được quân địch?', opts:['Nhờ có nhiều quân hơn','Nhờ có thuyền to hơn','Nhờ quân địch tự bỏ chạy','Nhờ mưu kế cắm cọc gỗ dưới lòng sông'], a:3,
+    ex:'Ngô Quyền cho <b>cắm cọc gỗ đầu bịt sắt</b> dưới lòng sông Bạch Đằng. Thủy triều rút, thuyền giặc đâm vào cọc và bị đắm.' },
+  { q:'Sông Bạch Đằng ở tỉnh nào?', hard:true, opts:['Hà Nội','Hải Phòng','Thanh Hóa','Nghệ An'], a:1,
+    ex:'Sông Bạch Đằng chảy qua <b>Hải Phòng</b>, nơi ngày nay vẫn còn di tích bãi cọc năm xưa.' }
+];
+const PRAISE = ['Giỏi quá!','Chuẩn luôn!','Tuyệt vời!','Đúng rồi!','Quá đỉnh!'];
+const KEYS = 'ABCD';
+const app = document.getElementById('app');
+const star = cls => `<svg class="${cls||''}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3 6.6 7 .8-5.2 4.8 1.4 7L12 17.7 5.8 21.2l1.4-7L2 9.4l7-.8z"/></svg>`;
+let S;
+
+function reset(){ S = { i:0, picked:-1, done:false, score:0, hist:[] }; render(); }
+
+function render(){
+  if (S.i >= Q.length) return renderResult();
+  const q = Q[S.i], pct = (S.i + (S.done?1:0)) / Q.length * 100;
+  app.innerHTML = `
+    <header class="top">
+      <button class="close" aria-label="Thoát" id="close">✕</button>
+      <span class="flame"></span>
+      <div class="bar" role="progressbar" aria-valuenow="${S.i}" aria-valuemax="${Q.length}"><i style="width:${pct}%"></i></div>
+      <div class="stakes" aria-hidden="true">${Q.map((_,k)=>`<i class="${k<S.i+(S.done?1:0)?'on':''}"></i>`).join('')}</div>
+      <span class="score">${star()}<span>${S.score}</span></span>
+    </header>
+    <section class="q">
+      <div class="kind ${q.hard?'hard':''}">${q.hard?'Câu hỏi khó · ':''}Câu ${S.i+1} / ${Q.length}</div>
+      <h2>${q.q}</h2>
+      <div class="opts">${q.opts.map((o,k)=>`<button class="opt ${cls(k)}" data-k="${k}" aria-pressed="${S.picked===k&&!S.done}" ${S.done?'disabled':''}><span class="key">${KEYS[k]}</span><span>${o}</span></button>`).join('')}</div>
+    </section>
+    ${foot(q)}`;
+  app.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => { if (S.done) return; S.picked = +b.dataset.k; render(); }));
+  const go = app.querySelector('#go');
+  if (go) go.addEventListener('click', () => {
+    if (!S.done) { S.done = true; const ok = S.picked === q.a; if (ok) S.score++; S.hist.push(ok); }
+    else { S.i++; S.picked = -1; S.done = false; }
+    render();
+  });
+  app.querySelector('#close').addEventListener('click', reset);
+}
+function cls(k){ if (!S.done) return ''; if (k === Q[S.i].a) return 'right'; if (k === S.picked) return 'wrong'; return ''; }
+function foot(q){
+  if (!S.done) return `<footer class="foot"><button class="btn" id="go" ${S.picked<0?'disabled':''}>Kiểm tra</button></footer>`;
+  const ok = S.picked === q.a;
+  return `<footer class="foot ${ok?'right':'wrong'}">
+    <span class="seal">${ok?'ĐÚNG':'SAI'}</span>
+    <div class="fb-head"><span class="dot">${ok?'✓':'✕'}</span>${ok?PRAISE[S.i]:'Chưa đúng rồi'}</div>
+    <div class="fb-body">${ok?'':`Đáp án đúng: <b>${q.opts[q.a]}</b>. `}${q.ex}</div>
+    <button class="btn" id="go">${S.i+1<Q.length?'Tiếp tục':'Xem kết quả'}</button>
+  </footer>`;
+}
+function renderResult(){
+  const n = S.score, stars = n>=5?3:n>=3?2:n>=1?1:0;
+  const msg = n===5?'Em là tướng tài của Ngô Quyền rồi!':n>=3?'Giỏi lắm, thử lại để đạt 3 sao nhé!':'Chưa sao, đọc lại câu chuyện rồi thử lại nhé!';
+  app.innerHTML = `
+    <section class="result">
+      <h2>Trận Bạch Đằng 938</h2>
+      <div class="big-stars">${[0,1,2].map(k=>star(k<stars?'':'off')).join('')}</div>
+      <div class="tile"><div class="lab">Đúng</div><div class="val">${n} / ${Q.length}</div></div>
+      <p>${msg}</p>
+      <button class="btn" id="again">Chơi lại</button>
+    </section>`;
+  app.querySelector('#again').addEventListener('click', reset);
+}
+
+document.querySelectorAll('.pick').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.dataset.style = b.dataset.s;
+  document.querySelectorAll('.pick').forEach(x => x.setAttribute('aria-pressed', x === b));
+  reset();
+}));
+document.documentElement.dataset.style = 'app';
+reset();
+})();
+</script>
