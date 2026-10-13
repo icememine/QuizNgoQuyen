@@ -1,0 +1,362 @@
+<title>Trận Bạch Đằng 938</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lora:ital,wght@0,500;0,700;1,500&display=swap">
+<style>
+/* Layout: a living painted sea (canvas) behind one parchment scroll. The scroll holds
+   intro → 5 questions → result. Single committed look: old painting, parchment, wood, red seal. */
+:root{
+  --sea:#B8CDD3; --surface:#F3E6C8; --sunken:#EAD9B3; --ink:#2E1F12; --muted:#7A6248; --line:#B9966A;
+  --wood:#6B3F22; --wood-deep:#3F2312; --wood-soft:#E6D2A6;
+  --good:#2F7D5B; --good-deep:#1E5A40; --good-soft:#DDEBD8;
+  --bad:#B3302A; --bad-deep:#7F1F1B; --bad-soft:#F2D3C8;
+  --gold:#C9972B; --gold-deep:#8A6316; --cream:#F8EDD2;
+  --f-display:"Playfair Display",Georgia,"Times New Roman",serif;
+  --f-body:"Lora",Georgia,serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--sea);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.12}
+p{margin:0}
+#sea{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+
+.wrap{position:relative;z-index:1;min-height:100%;display:flex;justify-content:center;align-items:flex-start;padding:28px 16px 36px}
+.shell{position:relative;width:100%;max-width:520px;min-height:620px;display:flex;flex-direction:column;overflow:hidden;
+  background:linear-gradient(rgba(107,63,34,.05),transparent 18%),radial-gradient(circle at 8% 92%,rgba(107,63,34,.10),transparent 42%),radial-gradient(circle at 92% 10%,rgba(107,63,34,.08),transparent 38%),var(--surface);
+  border:3px double var(--wood);border-radius:4px;
+  box-shadow:0 0 0 6px var(--surface),0 0 0 9px var(--wood),0 30px 50px -22px rgba(30,20,10,.6)}
+.shell::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.025) 0 1px,transparent 1px 7px);mix-blend-mode:multiply}
+
+/* ---------- header: stakes & score ---------- */
+.top{display:flex;align-items:center;gap:12px;margin:0 16px;padding:14px 0 10px;border-bottom:1px solid var(--line)}
+.iconbtn{background:none;border:0;color:var(--muted);font-size:20px;line-height:1;padding:4px 6px;border-radius:8px}
+.stakes{flex:1;display:flex;justify-content:center;gap:10px;align-items:flex-end;height:34px}
+.stake{width:12px;height:30px;position:relative;opacity:.35;transform:translateY(6px);transition:opacity .3s}
+.stake::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#8A5A32,#6B3F22 55%,#4F2D16);clip-path:polygon(50% 0,100% 28%,100% 100%,0 100%,0 28%)}
+.stake::after{content:"";position:absolute;left:0;right:0;top:0;height:30%;background:linear-gradient(90deg,#9AA1A6,#5C656B);clip-path:polygon(50% 0,100% 95%,0 95%)}
+.stake.on{opacity:1;animation:plant .55s cubic-bezier(.2,1.4,.4,1) forwards}
+.stake.miss{opacity:.6;filter:grayscale(.6);animation:wobble .5s ease-out forwards}
+.stake.set{animation:none}
+.stake.on.set{transform:none} .stake.miss.set{transform:rotate(-6deg)}
+@keyframes plant{0%{transform:translateY(-26px) scale(1.15)}55%{transform:translateY(5px) scale(.95)}100%{transform:translateY(0)}}
+@keyframes wobble{0%{transform:translateY(0) rotate(0)}30%{transform:rotate(-14deg)}60%{transform:rotate(10deg)}100%{transform:rotate(-6deg)}}
+.score{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--wood);font-variant-numeric:tabular-nums;font-family:var(--f-display);font-size:18px}
+.score svg{width:28px;height:22px}
+
+/* ---------- intro ---------- */
+.intro{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:28px 22px 24px}
+.eyebrow{font-family:var(--f-display);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--bad)}
+.eyebrow::before,.eyebrow::after{content:" ❧ ";color:var(--gold)}
+.intro h1{font-size:40px;font-weight:900;color:var(--wood);animation:rise .7s .1s both}
+.intro .year{font-family:var(--f-display);font-style:italic;font-size:20px;color:var(--gold-deep);animation:rise .7s .25s both}
+.intro p{max-width:34ch;color:var(--muted);font-weight:500;animation:rise .7s .4s both}
+.hero{width:100%;max-width:380px;margin-top:6px;animation:rise .7s .3s both}
+.hero svg{width:100%;height:auto;display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.bob{animation:bob 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes bob{50%{transform:translateY(-3px) rotate(-1.5deg)}}
+.wave-path{animation:drift 4s linear infinite}
+@keyframes drift{to{transform:translateX(-40px)}}
+
+/* ---------- question ---------- */
+.q{flex:1;padding:14px 20px 20px;display:flex;flex-direction:column;gap:16px}
+.q.enter{animation:unroll .55s cubic-bezier(.2,1,.3,1) both;transform-origin:top center}
+@keyframes unroll{from{opacity:0;transform:scaleY(.2) translateY(-20px)}to{opacity:1;transform:none}}
+.kind{font-family:var(--f-display);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--bad);text-align:center}
+.kind::before,.kind::after{content:" ❧ ";color:var(--gold)}
+.kind.hard{color:var(--wood)}
+.kind.hard b{display:inline-block;background:var(--bad);color:var(--cream);padding:1px 8px;border-radius:3px;margin-right:6px;letter-spacing:.14em;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.q h2{font-size:25px;font-weight:900;text-align:center}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:6px;background:var(--sunken);padding:12px 14px;
+  box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--line);font-weight:500;font-size:17px;transition:transform .12s,box-shadow .12s;
+  animation:slidein .45s cubic-bezier(.2,1,.3,1) both;animation-delay:calc(.08s * var(--n) + .15s)}
+@keyframes slidein{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+.opt:not([disabled]):hover{transform:translateY(-2px);box-shadow:inset 0 0 0 3px var(--surface),0 4px 0 var(--line)}
+.opt:not([disabled]):active{transform:translateY(1px);box-shadow:inset 0 0 0 3px var(--surface),0 1px 0 var(--line)}
+.opt .key{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--bad);display:grid;place-items:center;font-size:13px;font-weight:900;color:var(--bad);font-family:var(--f-display);transition:transform .2s}
+.opt[aria-pressed="true"]{background:var(--wood-soft);border-color:var(--wood);box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--wood)}
+.opt[aria-pressed="true"] .key{background:var(--bad);color:var(--cream);transform:scale(1.12) rotate(-8deg)}
+.opt.right{border-color:var(--good);background:var(--good-soft);box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--good);animation:bump .5s}
+.opt.right .key{background:var(--good);border-color:var(--good);color:var(--cream)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);box-shadow:inset 0 0 0 3px var(--surface),0 2px 0 var(--bad);animation:shake .45s}
+.opt.wrong .key{background:var(--bad);color:var(--cream)}
+.opt[disabled]{cursor:default}
+.opt[disabled]:not(.right):not(.wrong){opacity:.55}
+@keyframes bump{30%{transform:scale(1.03)}}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+/* ---------- feedback ---------- */
+.foot{position:relative;border-top:1px solid var(--line);padding:12px 20px 18px;display:flex;flex-direction:column;gap:10px;background:var(--surface);animation:up .3s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+.scene{width:100%;height:auto;display:block;margin:-4px 0 -6px}
+.scene .ship{transform-box:fill-box;transform-origin:50% 90%}
+.foot.right .scene .ship{animation:crash 1.9s cubic-bezier(.3,0,.5,1) forwards}
+.foot.wrong .scene .ship{animation:sail 2.4s ease-in-out forwards}
+@keyframes crash{0%{transform:translateX(-120px)}45%{transform:translateX(0) rotate(0)}55%{transform:translateX(6px) rotate(-8deg)}100%{transform:translateX(10px) translateY(44px) rotate(-32deg)}}
+@keyframes sail{0%{transform:translateX(-120px) rotate(0)}50%{transform:translateX(0) rotate(2deg)}100%{transform:translateX(230px) rotate(-1deg)}}
+.scene .splash{opacity:0;transform-box:fill-box;transform-origin:center bottom}
+.foot.right .scene .splash{animation:splash .8s .85s ease-out forwards}
+@keyframes splash{0%{opacity:0;transform:scaleY(.2)}30%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:translateY(-14px) scale(1.3)}}
+.scene .stake-g{transform-box:fill-box;transform-origin:center bottom}
+.foot.right .scene .stake-g{animation:hit .5s .82s ease-out}
+@keyframes hit{30%{transform:rotate(-5deg)}70%{transform:rotate(3deg)}}
+.seal{position:absolute;right:16px;top:-22px;width:70px;height:70px;border:3px solid var(--bad);border-radius:50%;display:grid;place-items:center;color:var(--bad);font-family:var(--f-display);font-weight:900;font-size:15px;letter-spacing:.08em;background:var(--surface);box-shadow:inset 0 0 0 3px var(--surface),inset 0 0 0 4px var(--bad);animation:stamp .5s cubic-bezier(.2,1.2,.4,1) both;z-index:2}
+.foot.right .seal{border-color:var(--good);color:var(--good);box-shadow:inset 0 0 0 3px var(--surface),inset 0 0 0 4px var(--good)}
+@keyframes stamp{0%{transform:rotate(-30deg) scale(2.4);opacity:0}60%{transform:rotate(-12deg) scale(.9);opacity:1}100%{transform:rotate(-12deg) scale(1)}}
+.fb-head{font-family:var(--f-display);font-size:24px;font-weight:900;font-style:italic}
+.foot.right .fb-head{color:var(--good)} .foot.wrong .fb-head{color:var(--bad)}
+.fb-body{font-size:15px;font-weight:500}
+.fb-body b{font-weight:700;color:var(--wood)}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;border:0;border-radius:6px;padding:14px 18px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.16em;text-transform:uppercase;background:var(--wood);color:var(--cream);box-shadow:0 4px 0 var(--wood-deep);transition:transform .06s,box-shadow .06s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--wood-deep)}
+.btn[disabled]{background:var(--sunken);color:var(--muted);box-shadow:0 4px 0 var(--line);cursor:default}
+.btn.red{background:var(--bad);box-shadow:0 4px 0 var(--bad-deep)}
+.btn.gold{background:var(--gold);box-shadow:0 4px 0 var(--gold-deep);color:var(--ink)}
+.btn.ready{animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(-2px);box-shadow:0 6px 0 var(--wood-deep)}}
+
+/* ---------- result ---------- */
+.result{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:26px 20px;text-align:center;position:relative}
+.result h2{font-size:34px;font-weight:900;color:var(--wood);animation:rise .6s both}
+.result .sub{font-family:var(--f-display);font-style:italic;color:var(--gold-deep);font-size:18px;animation:rise .6s .15s both}
+.fleet{width:100%;max-width:400px;animation:rise .6s .3s both}
+.fleet svg{width:100%;height:auto;display:block}
+.fleet .ship{transform-box:fill-box;transform-origin:50% 90%}
+.fleet .ship.sunk{animation:sink 1.4s ease-in forwards;animation-delay:calc(.35s * var(--n) + .6s)}
+@keyframes sink{to{transform:translateY(34px) rotate(-28deg)}}
+.big-stars{display:flex;gap:8px;color:var(--gold)}
+.big-stars svg{width:46px;height:46px;opacity:0;transform:scale(.2);animation:popstar .5s cubic-bezier(.2,1.4,.4,1) forwards;animation-delay:calc(.25s * var(--n) + 1.2s)}
+.big-stars svg.off{color:var(--line)}
+@keyframes popstar{to{opacity:1;transform:scale(1) rotate(-6deg)}}
+.tile{border:2px solid var(--gold);border-radius:6px;overflow:hidden;font-weight:800;min-width:160px;animation:rise .6s .5s both}
+.tile .lab{font-family:var(--f-display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:4px}
+.tile .val{padding:10px;font-family:var(--f-display);font-size:28px;color:var(--wood);font-variant-numeric:tabular-nums}
+.result p.msg{color:var(--muted);font-weight:500;max-width:32ch;animation:rise .6s .7s both}
+.result .btn{max-width:320px;animation:rise .6s .9s both}
+#confetti{position:absolute;inset:0;pointer-events:none;width:100%;height:100%}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}
+  .foot.right .scene .ship{transform:translateX(10px) translateY(44px) rotate(-32deg)} .foot.wrong .scene .ship{transform:translateX(230px)}
+  .big-stars svg{opacity:1;transform:none} .fleet .ship.sunk{transform:translateY(34px) rotate(-28deg)}}
+</style>
+
+<canvas id="sea" aria-hidden="true"></canvas>
+<div class="wrap"><main class="shell" id="app" aria-live="polite"></main></div>
+
+<script>
+(function(){
+'use strict';
+const Q = [
+  { q:'Quân địch kéo sang xâm lược nước ta có bao nhiêu quân?', opts:['2.000 quân','20.000 quân','200.000 quân','2.000.000 quân'], a:1,
+    ex:'Vua Nam Hán sai con là Lưu Hoằng Tháo đem <b>20.000 quân</b> đi thuyền chiến sang đánh nước ta.' },
+  { q:'Quân địch là nhà nào của Trung Quốc?', opts:['Nhà Đường','Nhà Tống','Nam Hán','Nhà Minh'], a:2,
+    ex:'Năm 938, quân <b>Nam Hán</b> theo đường biển tiến vào cửa sông Bạch Đằng.' },
+  { q:'Ai là người phản bội Dương Đình Nghệ?', opts:['Kiều Công Tiễn','Lưu Hoằng Tháo','Khúc Thừa Dụ','Ngô Quyền'], a:0,
+    ex:'<b>Kiều Công Tiễn</b> giết Dương Đình Nghệ rồi cầu cứu quân Nam Hán. Ngô Quyền kéo quân ra trừng trị kẻ phản bội.' },
+  { q:'Tại sao Ngô Quyền chiến thắng được quân địch?', opts:['Nhờ có nhiều quân hơn','Nhờ có thuyền to hơn','Nhờ quân địch tự bỏ chạy','Nhờ mưu kế cắm cọc gỗ dưới lòng sông'], a:3,
+    ex:'Ngô Quyền cho <b>cắm cọc gỗ đầu bịt sắt</b> dưới lòng sông. Thủy triều rút, thuyền giặc đâm vào cọc và bị đắm.' },
+  { q:'Sông Bạch Đằng ở tỉnh nào?', hard:true, opts:['Hà Nội','Hải Phòng','Thanh Hóa','Nghệ An'], a:1,
+    ex:'Sông Bạch Đằng chảy qua <b>Hải Phòng</b>, nơi ngày nay vẫn còn di tích bãi cọc năm xưa.' }
+];
+const PRAISE = ['Giỏi quá!','Chuẩn luôn!','Tuyệt vời!','Đúng rồi!','Quá đỉnh!'];
+const KEYS = 'ABCD';
+const app = document.getElementById('app');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let S;
+
+/* ---------- small SVG pieces ---------- */
+const star = cls => `<svg class="${cls||''}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3 6.6 7 .8-5.2 4.8 1.4 7L12 17.7 5.8 21.2l1.4-7L2 9.4l7-.8z"/></svg>`;
+/* Enemy junk with the 漢 flag, ~100×80 user units, hull bottom at y=78. */
+const enemyShip = (x, y, cls) => `<g class="ship ${cls||''}" transform="translate(${x} ${y})">
+  <path d="M8 60 Q50 72 92 56 L86 78 Q50 86 14 78 Z" fill="#6B3F22" stroke="#3F2312" stroke-width="2"/>
+  <rect x="48" y="8" width="3" height="56" fill="#3F2312"/>
+  <path d="M52 12 L82 22 L80 50 L52 56 Z" fill="#C98A4A" stroke="#7F4F22" stroke-width="1.5"/>
+  <path d="M52 24 L81 30 M52 36 L80 40 M52 47 L80 46" stroke="#7F4F22" stroke-width="1.2" fill="none"/>
+  <path d="M51 6 L34 10 L51 14 Z" fill="#1D1A17"/>
+  <text x="38" y="12.6" font-size="6" fill="#F3E6C8" font-family="serif" font-weight="700">漢</text>
+</g>`;
+const stakesSVG = x => `<g class="stake-g" transform="translate(${x} 0)">
+  ${[0,14,28].map((dx,i)=>{ const top = 62-(i%2)*6; return `<path d="M${dx+2} 92 L${dx+8} ${top} L${dx+14} 92" fill="#6B3F22" stroke="#3F2312" stroke-width="1.5"/><path d="M${dx+5} ${top+10} L${dx+8} ${top} L${dx+11} ${top+10}" fill="#8A9399"/>`; }).join('')}
+</g>`;
+const waterSVG = (w, y, cls) => `<path class="${cls||''}" d="M-40 ${y} ${Array.from({length:Math.ceil(w/40)+2},(_,i)=>`q10 -7 20 0 t20 0`).join(' ')} V140 H-40 Z" fill="#9DB7C0" opacity=".9"/>`;
+
+const heroSVG = `<svg viewBox="0 0 380 130" role="img" aria-label="Thuyền giặc tiến vào bãi cọc trên sông Bạch Đằng">
+  <path d="M0 70 Q60 40 120 66 T240 60 T380 66 V80 H0 Z" fill="#AFC3C9"/>
+  ${enemyShip(60, 10, 'bob')}
+  ${stakesSVG(230)}
+  <g class="bob" style="animation-delay:-1.2s">
+    <path d="M292 88 Q320 96 352 86 L348 100 Q320 106 296 100 Z" fill="#8A5A32" stroke="#3F2312" stroke-width="1.5"/>
+    <rect x="322" y="52" width="2.5" height="40" fill="#3F2312"/>
+    <path d="M325 54 L348 62 L325 74 Z" fill="#E7B84A" stroke="#8A6316"/>
+  </g>
+  ${waterSVG(380, 92, 'wave-path')}
+</svg>`;
+
+const sceneSVG = `<svg class="scene" viewBox="0 0 320 112" aria-hidden="true">
+  ${stakesSVG(176)}
+  ${enemyShip(112, 10, '')}
+  <g class="splash"><ellipse cx="178" cy="90" rx="34" ry="8" fill="#DCE7EA" opacity=".9"/><circle cx="160" cy="82" r="4" fill="#fff"/><circle cx="196" cy="80" r="3" fill="#fff"/><circle cx="178" cy="74" r="3.5" fill="#fff"/></g>
+  ${waterSVG(320, 90)}
+</svg>`;
+
+/* ---------- audio (tiny, synthesized; only after the viewer taps) ---------- */
+const AU = { ctx:null, muted:false };
+try { AU.muted = localStorage.getItem('bd-muted') === '1'; } catch (e) {}
+function ctx(){ if (!AU.ctx) { try { AU.ctx = new (window.AudioContext||window.webkitAudioContext)(); } catch (e) {} } return AU.ctx; }
+function tone(f, d, type, g, t0){
+  const c = ctx(); if (!c || AU.muted) return;
+  const o = c.createOscillator(), v = c.createGain(), t = c.currentTime + (t0||0);
+  o.type = type||'sine'; o.frequency.setValueAtTime(f, t);
+  v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(g||.12, t+.01); v.gain.exponentialRampToValueAtTime(.0001, t+d);
+  o.connect(v).connect(c.destination); o.start(t); o.stop(t+d+.02);
+}
+const SND = {
+  tap: () => tone(660,.06,'triangle',.05),
+  right: () => { tone(523,.14,'sine',.12); tone(659,.14,'sine',.12,.12); tone(784,.3,'sine',.14,.24); },
+  wrong: () => { tone(180,.22,'triangle',.12); tone(140,.35,'triangle',.1,.18); },
+  hammer: () => { tone(95,.08,'square',.08); tone(70,.1,'square',.06,.07); },
+  win: () => [523,659,784,1047].forEach((f,i)=>tone(f,.25,'sine',.12,i*.13))
+};
+
+/* ---------- screens ---------- */
+function reset(){ S = { screen:'intro', i:0, picked:-1, done:false, score:0 }; render(); }
+const muteBtn = () => `<button class="iconbtn" id="mute" aria-label="${AU.muted?'Bật âm thanh':'Tắt âm thanh'}" title="Âm thanh">${AU.muted?'🔇':'🔊'}</button>`;
+function bindMute(){ const m = app.querySelector('#mute'); if (m) m.addEventListener('click', () => { AU.muted = !AU.muted; try { localStorage.setItem('bd-muted', AU.muted?'1':'0'); } catch(e){} m.textContent = AU.muted?'🔇':'🔊'; m.setAttribute('aria-label', AU.muted?'Bật âm thanh':'Tắt âm thanh'); if (!AU.muted) SND.tap(); }); }
+
+function render(){
+  if (S.screen === 'intro') return renderIntro();
+  if (S.i >= Q.length) return renderResult();
+  const q = Q[S.i];
+  app.innerHTML = `
+    <header class="top">
+      <button class="iconbtn" id="close" aria-label="Về trang đầu">✕</button>
+      <div class="stakes" aria-label="Tiến độ: ${S.i} trên ${Q.length} câu">${Q.map((_,k)=>`<span class="stake ${stakeCls(k)}"></span>`).join('')}</div>
+      ${muteBtn()}
+      <span class="score" title="Thuyền giặc đã đắm"><svg viewBox="0 0 28 22" aria-hidden="true"><path d="M2 14 Q14 18 26 13 L24 20 Q14 23 4 20 Z" fill="#6B3F22"/><rect x="13" y="2" width="1.5" height="13" fill="#3F2312"/><path d="M15 3 L24 7 L15 13 Z" fill="#C98A4A"/></svg><span id="sc">${S.score}</span></span>
+    </header>
+    <section class="q ${S.done?'':'enter'}">
+      <div class="kind ${q.hard?'hard':''}">${q.hard?'<b>Khó</b>':''}Câu ${S.i+1} / ${Q.length}</div>
+      <h2>${q.q}</h2>
+      <div class="opts">${q.opts.map((o,k)=>`<button class="opt ${optCls(k)}" style="--n:${k}" data-k="${k}" aria-pressed="${S.picked===k&&!S.done}" ${S.done?'disabled':''}><span class="key">${KEYS[k]}</span><span>${o}</span></button>`).join('')}</div>
+    </section>
+    ${foot(q)}`;
+  app.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => { if (S.done) return; S.picked = +b.dataset.k; SND.tap(); render(); }));
+  app.querySelector('#go').addEventListener('click', () => {
+    if (!S.done) { S.done = true; const ok = S.picked === q.a; S.ok = ok; if (ok) S.score++; ok ? SND.right() : SND.wrong(); render(); if (ok) setTimeout(SND.hammer, 850); }
+    else { S.i++; S.picked = -1; S.done = false; SND.tap(); if (S.i >= Q.length) { S.screen = 'result'; } render(); }
+  });
+  app.querySelector('#close').addEventListener('click', reset);
+  bindMute();
+}
+/* past stakes sit still ("set"); only the stake of the question just answered animates */
+function stakeCls(k){ const h = S.hist || []; if (k < S.i) return (h[k] ? 'on' : 'miss') + ' set'; if (k === S.i && S.done) return h[k] ? 'on' : 'miss'; return ''; }
+function optCls(k){ if (!S.done) return ''; if (k === Q[S.i].a) return 'right'; if (k === S.picked) return 'wrong'; return ''; }
+function foot(q){
+  if (!S.done) return `<footer class="foot"><button class="btn ${S.picked>=0?'ready':''}" id="go" ${S.picked<0?'disabled':''}>${S.picked<0?'Chọn một đáp án':'Kiểm tra'}</button></footer>`;
+  const ok = S.picked === q.a;
+  return `<footer class="foot ${ok?'right':'wrong'}">
+    <span class="seal" aria-hidden="true">${ok?'ĐÚNG':'SAI'}</span>
+    ${sceneSVG}
+    <div class="fb-head">${ok?PRAISE[S.i]:'Chưa đúng rồi'}</div>
+    <div class="fb-body">${ok?'':`Đáp án đúng: <b>${q.opts[q.a]}</b>. `}${q.ex}</div>
+    <button class="btn ${ok?'':'red'}" id="go">${S.i+1<Q.length?'Tiếp tục':'Xem kết quả'}</button>
+  </footer>`;
+}
+/* keep a per-question record so the stakes stay planted or wobbled after moving on */
+const _render = render;
+render = function(){ if (S.screen !== 'intro' && S.done) { S.hist = S.hist || []; S.hist[S.i] = S.ok; } _render(); };
+
+function renderIntro(){
+  app.innerHTML = `
+    <header class="top"><span style="flex:1"></span>${muteBtn()}</header>
+    <section class="intro">
+      <div class="eyebrow">Lịch sử Việt Nam</div>
+      <h1>Trận Bạch Đằng</h1>
+      <div class="year">Năm 938</div>
+      <div class="hero">${heroSVG}</div>
+      <p>Quân Nam Hán kéo thuyền chiến sang xâm lược. Ngô Quyền có một mưu kế bí mật dưới lòng sông… Em nhớ câu chuyện đến đâu? Trả lời đúng để đánh đắm từng chiếc thuyền giặc!</p>
+      <button class="btn gold" id="start" style="max-width:320px;margin-top:8px">Vào trận ⚔</button>
+    </section>`;
+  app.querySelector('#start').addEventListener('click', () => { ctx(); SND.tap(); S.screen = 'quiz'; S.hist = []; render(); });
+  bindMute();
+}
+
+function renderResult(){
+  const n = S.score, stars = n>=5?3:n>=3?2:n>=1?1:0;
+  const title = n===5?'Đại thắng!':n>=3?'Thắng trận!':'Chưa thắng rồi';
+  const msg = n===5?'Em là một vị tướng tài của Ngô Quyền! Toàn bộ thuyền giặc đã đắm trên sông Bạch Đằng.':n>=3?`Em đã đánh đắm ${n} thuyền giặc. Chơi lại để quét sạch cả 5 chiếc nhé!`:'Thuyền giặc vẫn còn nhiều. Đọc lại câu chuyện rồi vào trận lần nữa nhé!';
+  const hist = S.hist || [];
+  app.innerHTML = `
+    <section class="result">
+      <canvas id="confetti" aria-hidden="true"></canvas>
+      <h2>${title}</h2>
+      <div class="sub">Sông Bạch Đằng, năm 938</div>
+      <div class="fleet" aria-label="${n} trên 5 thuyền giặc đã đắm"><svg viewBox="0 0 400 120">
+        <g transform="translate(0 30) scale(.72)">${[0,1,2,3,4].map(k=>`<g transform="translate(${k*111} 0)">${stakesSVG(50)}</g>`).join('')}</g>
+        <g transform="translate(0 28) scale(.72)">${Q.map((_,k)=>enemyShip(8+k*111, 0, hist[k]?'sunk':'')).map((s,k)=>s.replace('class="ship', `style="--n:${k}" class="ship`)).join('')}</g>
+        ${waterSVG(400, 88)}
+      </svg></div>
+      <div class="big-stars">${[0,1,2].map(k=>star(k<stars?'':'off').replace('<svg', `<svg style="--n:${k}"`)).join('')}</div>
+      <div class="tile"><div class="lab">Thuyền giặc đắm</div><div class="val"><span id="count">0</span> / ${Q.length}</div></div>
+      <p class="msg">${msg}</p>
+      <button class="btn" id="again">Chơi lại</button>
+    </section>`;
+  app.querySelector('#again').addEventListener('click', () => { SND.tap(); reset(); });
+  /* count up */
+  const el = app.querySelector('#count'); let c = 0;
+  const tick = () => { el.textContent = c; if (c < n) { c++; setTimeout(tick, 220); } };
+  setTimeout(tick, reduced ? 0 : 700);
+  if (n >= 3) { setTimeout(SND.win, 1200); if (!reduced) confetti(app.querySelector('#confetti'), n === 5 ? 160 : 70); }
+}
+
+/* ---------- confetti: gold, red and parchment flakes ---------- */
+function confetti(cv, count){
+  const c = cv.getContext('2d'); const r = cv.getBoundingClientRect(); cv.width = r.width; cv.height = r.height;
+  const cols = ['#C9972B','#B3302A','#F3E6C8','#2F7D5B','#6B3F22'];
+  const P = Array.from({length:count},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,w:6+Math.random()*6,h:4+Math.random()*4,v:1.2+Math.random()*2.2,a:Math.random()*6.3,s:(Math.random()-.5)*.2,col:cols[Math.random()*cols.length|0]}));
+  let t = 0;
+  (function f(){ c.clearRect(0,0,cv.width,cv.height); let alive = false;
+    P.forEach(p=>{ p.y += p.v; p.x += Math.sin(p.a+t/20); p.a += p.s; if (p.y < cv.height+20) alive = true;
+      c.save(); c.translate(p.x,p.y); c.rotate(p.a); c.fillStyle = p.col; c.fillRect(-p.w/2,-p.h/2,p.w,p.h); c.restore(); });
+    t++; if (alive && t < 600 && document.body.contains(cv)) requestAnimationFrame(f); })();
+}
+
+/* ---------- the living sea behind the scroll ---------- */
+(function sea(){
+  const cv = document.getElementById('sea'), c = cv.getContext('2d');
+  let W, H, boats = [];
+  function size(){ W = cv.width = innerWidth * devicePixelRatio; H = cv.height = innerHeight * devicePixelRatio; c.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); W = innerWidth; H = innerHeight;
+    boats = Array.from({length:7},(_,i)=>({x:Math.random()*W, y:H*.3+Math.random()*H*.5, s:.4+Math.random()*.9, v:(Math.random()*.25+.08)*(Math.random()<.5?1:-1), enemy:i%3===0})); }
+  size(); addEventListener('resize', size);
+  function boat(b, t){ const s = b.s, dir = b.v < 0 ? -1 : 1, bob = Math.sin(t/900 + b.x) * 2;
+    c.save(); c.translate(b.x, b.y + bob); c.scale(s*dir, s); c.globalAlpha = .55 + s*.3;
+    c.fillStyle = b.enemy ? '#5E3A20' : '#7A4E2A'; c.beginPath(); c.moveTo(-26,0); c.quadraticCurveTo(0,8,26,-2); c.lineTo(22,8); c.quadraticCurveTo(0,13,-22,8); c.closePath(); c.fill();
+    c.fillStyle = '#3F2312'; c.fillRect(-1,-34,2,34);
+    c.fillStyle = b.enemy ? '#C98A4A' : '#E7B84A'; c.beginPath(); c.moveTo(1,-32); c.lineTo(20,-22); c.lineTo(1,-6); c.closePath(); c.fill();
+    if (b.enemy) { c.fillStyle = '#1D1A17'; c.fillRect(-9,-38,10,5); } c.restore(); }
+  function frame(t){
+    c.clearRect(0,0,W,H);
+    const g = c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#DCE7EA'); g.addColorStop(.45,'#C3D5DA'); g.addColorStop(1,'#93AEB8'); c.fillStyle = g; c.fillRect(0,0,W,H);
+    /* sun haze */
+    const rg = c.createRadialGradient(W*.25,H*.08,0,W*.25,H*.08,W*.5); rg.addColorStop(0,'rgba(255,250,235,.8)'); rg.addColorStop(1,'rgba(255,250,235,0)'); c.fillStyle = rg; c.fillRect(0,0,W,H);
+    /* far hills */
+    c.fillStyle = 'rgba(125,150,160,.45)'; c.beginPath(); c.moveTo(0,H*.26);
+    for (let x=0;x<=W;x+=40) c.lineTo(x, H*.26 - Math.abs(Math.sin(x/230)*34 + Math.sin(x/90)*10)); c.lineTo(W,H*.3); c.lineTo(0,H*.3); c.fill();
+    /* wave bands */
+    for (let i=0;i<9;i++){ const y0 = H*.28 + i*(H*.72/9); c.strokeStyle = `rgba(255,255,255,${.18+i*.03})`; c.lineWidth = 1.5+i*.3; c.beginPath();
+      for (let x=-20;x<=W+20;x+=10){ const y = y0 + Math.sin((x+t*(.03+i*.004))/ (60+i*8)) * (4+i) + Math.sin((x*.5 - t*.02)/40)*2; x===-20?c.moveTo(x,y):c.lineTo(x,y); } c.stroke(); }
+    boats.sort((a,b)=>a.y-b.y).forEach(b=>{ b.x += b.v; if (b.x > W+60) b.x = -60; if (b.x < -60) b.x = W+60; boat(b, t); });
+    if (!reduced) requestAnimationFrame(frame);
+  }
+  frame(0);
+})();
+
+reset();
+})();
+</script>
